@@ -14,18 +14,8 @@ Yii sentry log is a component for Yii to send all logging and exception to sentr
 
 ```php
     ...
-    
-    'import'=>array(
-    	...
-
-        'application.components.yii-sentry-log.lib.Raven.*',
-
-        ...
-    ),
-
     'components'=>array(
     	...
-
         'log'=>array(
             'class'=>'CLogRouter',
             'routes'=>array(
@@ -36,10 +26,8 @@ Yii sentry log is a component for Yii to send all logging and exception to sentr
                 ),                
             ),
         ),
-
         ...
     )
-
     ...
 ```
 
