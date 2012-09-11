@@ -11,7 +11,7 @@
 /**
  * RSentryLog records log messages to sentry server.
  *
- * @author Qiang Xue <qiang.xue@gmail.com>
+ * @author Rolies Deby <rolies106@gmail.com>
  * @version $Id: CFileLogRoute.php 3426 2011-10-25 00:01:09Z alexander.makarow $
  * @package system.logging
  * @since 1.0
@@ -39,7 +39,18 @@ class RSentryLog extends CLogRoute
 	public function init()
 	{
 		parent::init();
-		Raven_Autoloader::register();
+		
+        # Turn off our amazing library autoload
+        spl_autoload_unregister(array('YiiBase','autoload'));  
+
+        # Include request library
+        include(dirname(__FILE__) . '/lib/Raven/Autoloader.php');
+
+        # Run request autoloader
+        Raven_Autoloader::register();
+
+        # Give back the power to Yii        
+        spl_autoload_register(array('YiiBase','autoload'));
 
 		if($this->_client===null)
 			$this->_client = new Raven_Client($this->dsn);
@@ -62,7 +73,8 @@ class RSentryLog extends CLogRoute
 				$level = self::DEBUG;
 			}
 
-			$title = ucwords($log[1]) . ' - ' . strtoupper($log[2]);
+			$format = explode("\n", $log[0]);
+			$title = strip_tags($format[0]);
 			$this->_client->captureMessage($title, array(), $level, true);
 		}
 	}
