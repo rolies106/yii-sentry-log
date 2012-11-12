@@ -49,11 +49,11 @@ class RSentryLog extends CLogRoute
         # Run request autoloader
         Raven_Autoloader::register();
 
-        # Give back the power to Yii        
-        spl_autoload_register(array('YiiBase','autoload'));
-
 		if($this->_client===null)
 			$this->_client = new Raven_Client($this->dsn);
+
+        # Give back the power to Yii        
+        spl_autoload_register(array('YiiBase','autoload'));		
 	}
 
 	/**

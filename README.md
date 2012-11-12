@@ -9,7 +9,7 @@ Yii sentry log is a component for Yii to send all logging and exception to sentr
 
 ## Configuring
 
-- Put your clone inside ```/protected/components/yii-sentry-log```
+- Put your clone or copy all files to ```/protected/components/yii-sentry-log```
 - Edit your ```config.php```
 
 ```php
