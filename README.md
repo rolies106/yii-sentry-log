@@ -33,7 +33,8 @@ RSentryComponent can be used to have proper trace back messages to use with the 
     ...
 ```
 
-- With RSentryComponent
+- With RSentryComponent thanks to @BoontjieSA, just worked for ```warning``` level and unfortunately its not running on a public server at the moment.
+
 ```php
     'preload'=> array('log', 'RSentryException'),
     'components'=>array(
