@@ -40,20 +40,24 @@ class RSentryLog extends CLogRoute
 	{
 		parent::init();
 		
-        # Turn off our amazing library autoload
-        spl_autoload_unregister(array('YiiBase','autoload'));  
+		if(!class_exists('Raven_Autoloader', false)) {
+			# Turn off our amazing library autoload
+			spl_autoload_unregister(array('YiiBase','autoload'));
 
-        # Include request library
-        include(dirname(__FILE__) . '/lib/Raven/Autoloader.php');
+			# Include request library
+			include(dirname(__FILE__) . '/lib/Raven/Autoloader.php');
 
-        # Run request autoloader
-        Raven_Autoloader::register();
+			# Run request autoloader
+			Raven_Autoloader::register();
+
+
+
+			# Give back the power to Yii
+			spl_autoload_register(array('YiiBase','autoload'));
+		}
 
 		if($this->_client===null)
-			$this->_client = new Raven_Client($this->dsn);
-
-        # Give back the power to Yii        
-        spl_autoload_register(array('YiiBase','autoload'));		
+				$this->_client = new Raven_Client($this->dsn);
 	}
 
 	/**

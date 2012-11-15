@@ -2,6 +2,8 @@
 
 Yii sentry log is a component for Yii to send all logging and exception to sentry server instead of showing it on screen or save it on files, especially when you set ```YII_DEBUG``` to ```false```, this module based on [raven-php](https://github.com/getsentry/raven-php) by [getsentry](https://github.com/getsentry)
 
+RSentryComponent can be used to have proper trace back messages to use with the yii log
+
 ## Requirement
 
 - Yii Framework >1.1.x
@@ -30,6 +32,31 @@ Yii sentry log is a component for Yii to send all logging and exception to sentr
     )
     ...
 ```
+
+- With RSentryComponent
+```php
+    'preload'=> array('log', 'RSentryException'),
+    'components'=>array(
+    	...
+    	'RSentryException'=> array(
+    	    'dsn'=> '[YOUR_DSN_FROM_SENTRY_SERVER]',
+            'class' => 'application.components..yii-sentry-log.RSentryComponent',
+    	),
+        'log'=>array(
+            'class'=>'CLogRouter',
+            'routes'=>array(
+                array(
+                    'class'=>'application.components.yii-sentry-log.RSentryLog',
+                    'dsn'=> '[YOUR_DSN_FROM_SENTRY_SERVER]',
+                    'levels'=>'warning',
+                ),                
+            ),
+        ),
+        ...
+    )
+    ...
+```
+
 
 ## Copyrights
 
