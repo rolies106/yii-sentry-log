@@ -18,71 +18,71 @@
  */
 class RSentryLog extends CLogRoute
 {
-	const DEBUG = 10;
+    const DEBUG = 10;
     const INFO = 20;
     const WARNING = 30;
     const ERROR = 40;
 
-	/**
-	 * @var string Sentry DSN value
-	 */
-	public $dsn;
+    /**
+     * @var string Sentry DSN value
+     */
+    public $dsn;
 
-	/**
-	 * @var class Sentry stored connection
-	 */
-	protected $_client;
+    /**
+     * @var class Sentry stored connection
+     */
+    protected $_client;
 
-	/**
-	 * Initializes the connection.
-	 */
-	public function init()
-	{
-		parent::init();
-		
-		if(!class_exists('Raven_Autoloader', false)) {
-			# Turn off our amazing library autoload
-			spl_autoload_unregister(array('YiiBase','autoload'));
+    /**
+     * Initializes the connection.
+     */
+    public function init()
+    {
+        parent::init();
+        
+        if(!class_exists('Raven_Autoloader', false)) {
+            # Turn off our amazing library autoload
+            spl_autoload_unregister(array('YiiBase','autoload'));
 
-			# Include request library
-			include(dirname(__FILE__) . '/lib/Raven/Autoloader.php');
+            # Include request library
+            include(dirname(__FILE__) . '/lib/Raven/Autoloader.php');
 
-			# Run request autoloader
-			Raven_Autoloader::register();
+            # Run request autoloader
+            Raven_Autoloader::register();
 
 
 
-			# Give back the power to Yii
-			spl_autoload_register(array('YiiBase','autoload'));
-		}
+            # Give back the power to Yii
+            spl_autoload_register(array('YiiBase','autoload'));
+        }
 
-		if($this->_client===null)
-				$this->_client = new Raven_Client($this->dsn);
-	}
+        if($this->_client===null)
+            $this->_client = new Raven_Client($this->dsn);
+    }
 
-	/**
-	 * Send log messages to Sentry.
-	 * @param array $logs list of log messages
-	 * @return Sentry event identifier
-	 */
-	protected function processLogs($logs)
-	{		
-		foreach($logs as $log) {
-			if ($log[1] == 'error') {
-				$level = self::ERROR;
-			} else if ($log[1] == 'warning') {
-				$level = self::WARNING;
-			} else if ($log[1] == 'info') {
-				$level = self::INFO;
-			} else if ($log[1] == 'trace') {
-				$level = self::DEBUG;
-			}
+    /**
+     * Send log messages to Sentry.
+     * @param array $logs list of log messages
+     * @return Sentry event identifier
+     */
+    protected function processLogs($logs)
+    {       
+        foreach($logs as $log) {
+            if ($log[1] == 'error') {
+                $level = self::ERROR;
+            } else if ($log[1] == 'warning') {
+                $level = self::WARNING;
+            } else if ($log[1] == 'info') {
+                $level = self::INFO;
+            } else if ($log[1] == 'trace') {
+                $level = self::DEBUG;
+            }
 
-			$format = explode("\n", $log[0]);
-			$title = strip_tags($format[0]);
-			$sentryEventId = $this->_client->getIdent($this->_client->captureMessage($title, array(), $level, true));
+            $format = explode("\n", $log[0]);
+            $title = strip_tags($format[0]);
+            $sentryEventId = $this->_client->getIdent($this->_client->captureMessage($title, array(), $level, true));
 
-			return $sentryEventId;
-		}
-	}
+            return $sentryEventId;
+        }
+    }
 }
