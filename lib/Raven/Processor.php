@@ -6,13 +6,13 @@
  */
 class Raven_Processor
 {
-    function __construct(Raven_Client $client)
+    public function __construct(Raven_Client $client)
     {
         $this->client = $client;
     }
 
-    /** 
-     * Process and sanitize data, modifying the existing value if nescesary.
+    /**
+     * Process and sanitize data, modifying the existing value if necessary.
      */
     public function process(&$data)
     {

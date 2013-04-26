@@ -34,6 +34,11 @@ class RSentryLog extends CLogRoute
     protected $_client;
 
     /**
+     * @var string Logger identifier
+     */
+    protected $logger = 'php';
+
+    /**
      * Initializes the connection.
      */
     public function init()
@@ -50,14 +55,12 @@ class RSentryLog extends CLogRoute
             # Run request autoloader
             Raven_Autoloader::register();
 
-
-
             # Give back the power to Yii
             spl_autoload_register(array('YiiBase','autoload'));
         }
 
         if($this->_client===null)
-            $this->_client = new Raven_Client($this->dsn);
+            $this->_client = new Raven_Client($this->dsn, array('logger' => $this->logger));
     }
 
     /**
@@ -66,21 +69,21 @@ class RSentryLog extends CLogRoute
      * @return Sentry event identifier
      */
     protected function processLogs($logs)
-    {       
+    {
+        if (defined('YII_DEBUG') && YII_DEBUG === true) {
+            return false;
+        }
+           
         foreach($logs as $log) {
-            if ($log[1] == 'error') {
-                $level = self::ERROR;
-            } else if ($log[1] == 'warning') {
-                $level = self::WARNING;
-            } else if ($log[1] == 'info') {
-                $level = self::INFO;
-            } else if ($log[1] == 'trace') {
-                $level = self::DEBUG;
-            }
-
             $format = explode("\n", $log[0]);
             $title = strip_tags($format[0]);
-            $sentryEventId = $this->_client->getIdent($this->_client->captureMessage($title, array(), $level, true));
+            $sentryEventId = $this->_client->getIdent($this->_client->captureMessage($title, array('referrer' => Yii::app()->request->urlReferrer), $log[1], false));
+
+            return $sentryEventId;
+        }
+    }
+}
+rray(), $level, true));
 
             return $sentryEventId;
         }

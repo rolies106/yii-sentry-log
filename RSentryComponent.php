@@ -18,16 +18,25 @@ class RSentryComponent extends CApplicationComponent
 	 */
 	public $dsn;
 
+    /**
+     * @var class Sentry stored connection
+     */
+    protected $_client;
+
 	/**
-	 * @var class Sentry stored connection
+	 * @var string Logger indentifier
 	 */
-	protected $_client;
+	protected $logger;
 
 	/**
 	 * Initializes the connection.
 	 */
 	public function init()
 	{
+        if (defined('YII_DEBUG') && YII_DEBUG === true) {
+            return false;
+        }
+
 		parent::init();
 		
         if(!class_exists('Raven_Autoloader', false)) {
@@ -39,22 +48,50 @@ class RSentryComponent extends CApplicationComponent
 
             # Run request autoloader
             Raven_Autoloader::register();
+            
             # Give back the power to Yii
             spl_autoload_register(array('YiiBase','autoload'));
         }
 
         if($this->_client===null)
-			$this->_client = new Raven_Client($this->dsn);
+			$this->_client = new Raven_Client($this->dsn, array('logger' => $this->logger));
 
-        Yii::app()->attachEventHandler('onException',array($this,'handleException'));
+        Yii::app()->attachEventHandler('onException', array($this, 'handleException'));
+        Yii::app()->attachEventHandler('onError', array($this, 'handleError'));
+
+        $error_handler = new Raven_ErrorHandler($this->_client);
+        $error_handler->registerShutdownFunction();        
 	}
 
     /**
      * logs exception
-     * @param	CEvent	$event	Description
+     * @param CExceptionEvent $event Description
      */
-    public function handleException($event) {
-        $this->_client=$this->_client->captureException($event->exception);
+    public function handleException($event)
+    {
+        if (defined('YII_DEBUG') && YII_DEBUG === true) {
+            return false;
+        }
+
+        $this->_client->captureException($event->exception);
+        if ($this->_client->getLastError()) {
+            Yii::log($this->_client->getLastError(), CLogger::LEVEL_ERROR, 'raven');
+        }
     }
 
+    /**
+     * @param CErrorEvent $event
+     */
+    public function handleError($event)
+    {
+        if (defined('YII_DEBUG') && YII_DEBUG === true) {
+            return false;
+        }
+
+        $e = new ErrorException($event->message, $event->code, 0, $event->file, $event->line);
+        $this->_client->captureException($e);
+        if ($this->_client->getLastError()) {
+            Yii::log($this->_client->getLastError(), CLogger::LEVEL_ERROR, 'raven');
+        }
+    }
 }
