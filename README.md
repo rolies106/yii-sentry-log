@@ -41,7 +41,7 @@ RSentryComponent can be used to have proper trace back messages to use with the 
     	...
     	'RSentryException'=> array(
     	    'dsn'=> '[YOUR_DSN_FROM_SENTRY_SERVER]',
-            'class' => 'application.components..yii-sentry-log.RSentryComponent',
+            'class' => 'application.components.yii-sentry-log.RSentryComponent',
     	),
         'log'=>array(
             'class'=>'CLogRouter',
