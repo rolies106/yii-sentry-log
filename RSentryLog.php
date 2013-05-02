@@ -83,9 +83,3 @@ class RSentryLog extends CLogRoute
         }
     }
 }
-rray(), $level, true));
-
-            return $sentryEventId;
-        }
-    }
-}
