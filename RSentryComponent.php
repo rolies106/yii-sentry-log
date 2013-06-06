@@ -23,6 +23,11 @@ class RSentryComponent extends CApplicationComponent
      */
     protected $_client;
 
+    /**
+     * @var class Sentry error handler
+     */
+    protected $_error_handler;
+
 	/**
 	 * @var string Logger indentifier
 	 */
@@ -59,8 +64,8 @@ class RSentryComponent extends CApplicationComponent
         Yii::app()->attachEventHandler('onException', array($this, 'handleException'));
         Yii::app()->attachEventHandler('onError', array($this, 'handleError'));
 
-        $error_handler = new Raven_ErrorHandler($this->_client);
-        $error_handler->registerShutdownFunction();        
+        $this->_error_handler = new Raven_ErrorHandler($this->_client);
+        $this->_error_handler->registerShutdownFunction();
 	}
 
     /**
@@ -73,7 +78,7 @@ class RSentryComponent extends CApplicationComponent
             return false;
         }
 
-        $this->_client->captureException($event->exception);
+        $this->_error_handler->handleException($event->exception);
         if ($this->_client->getLastError()) {
             Yii::log($this->_client->getLastError(), CLogger::LEVEL_ERROR, 'raven');
         }
@@ -88,8 +93,13 @@ class RSentryComponent extends CApplicationComponent
             return false;
         }
 
-        $e = new ErrorException($event->message, $event->code, 0, $event->file, $event->line);
-        $this->_client->captureException($e);
+        $this->_error_handler->handleError(
+            $event->code,
+            $event->message,
+            $event->file,
+            $event->line,
+            $event->params // slightly different than typical context
+        );
         if ($this->_client->getLastError()) {
             Yii::log($this->_client->getLastError(), CLogger::LEVEL_ERROR, 'raven');
         }
